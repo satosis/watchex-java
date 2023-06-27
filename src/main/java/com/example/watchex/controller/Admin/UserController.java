@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.nio.file.attribute.UserPrincipalNotFoundException;
+import java.security.SecureRandom;
 import java.util.Map;
 
 @Controller
@@ -54,6 +56,13 @@ public class UserController {
 
     @PostMapping("/admin/user/save")
     public String save(User user, RedirectAttributes ra) {
+        int strength = 10; // work factor of bcrypt
+
+        BCryptPasswordEncoder bCryptPasswordEncoder =
+                new BCryptPasswordEncoder(strength, new SecureRandom());
+        String encodedPassword = bCryptPasswordEncoder.encode(user.getPassword());
+        user.setAdmin(true);
+        user.setPassword(encodedPassword);
         userService.save(user);
         ra.addFlashAttribute("message", messageSource.getMessage("create_user_success", new Object[0], LocaleContextHolder.getLocale()));
         return "redirect:/admin/users";

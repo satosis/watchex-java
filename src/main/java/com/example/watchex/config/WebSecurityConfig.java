@@ -2,6 +2,7 @@ package com.example.watchex.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,7 +22,8 @@ public class WebSecurityConfig {
         http
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/", "/home").permitAll()
-                        .requestMatchers("/bower_components/**", "/component/**").permitAll() // link css thì không cần xác thực
+                        .requestMatchers("/bower_components/**", "/component/**", "/admin/**").permitAll() // link css thì không cần xác thực
+                        .requestMatchers(HttpMethod.POST, "/admin/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
