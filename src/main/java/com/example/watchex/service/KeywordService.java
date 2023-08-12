@@ -1,6 +1,6 @@
 package com.example.watchex.service;
 
-import com.example.watchex.domain.Keyword;
+import com.example.watchex.entity.Keyword;
 import com.example.watchex.repository.KeywordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

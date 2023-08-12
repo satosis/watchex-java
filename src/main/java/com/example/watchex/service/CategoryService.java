@@ -1,6 +1,6 @@
 package com.example.watchex.service;
 
-import com.example.watchex.domain.Category;
+import com.example.watchex.entity.Category;
 import com.example.watchex.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

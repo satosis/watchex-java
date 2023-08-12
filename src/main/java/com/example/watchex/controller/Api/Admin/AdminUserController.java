@@ -1,49 +1,48 @@
-package com.example.watchex.controller.Admin;
+package com.example.watchex.controller.Api.Admin;
 
 import com.example.watchex.entity.User;
+import com.example.watchex.exceptions.MessageEntity;
 import com.example.watchex.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.nio.file.attribute.UserPrincipalNotFoundException;
-import java.security.SecureRandom;
 import java.util.Map;
 
-@Controller
-@RequestMapping("/admin/")
-public class UserController {
+@RestController
+@RequestMapping("/api/admin/users/")
+@RequiredArgsConstructor
+public class AdminUserController {
     @Autowired
     private MessageSource messageSource;
 
     @Autowired
     private UserService userService;
 
-    @GetMapping("users")
-    public String get(Model model, @RequestParam Map<String, String> params) {
+    @GetMapping("")
+    public ResponseEntity<?> getListAdv(@RequestParam Map<String, String> params) {
         int page = 0;
         if (params.get("page") != null) {
             page = Integer.parseInt(params.get("page"));
         }
-        findPaginate(page, model);
-        return "admin/users/index";
+        Page<User> users = userService.get(page);
+        return new ResponseEntity<>(new MessageEntity(200, users), HttpStatus.OK);
     }
 
-    private Model findPaginate(int page, Model model) {
-        Page<User> users = userService.get(page);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", users.getTotalPages());
-        model.addAttribute("totalItems", users.getTotalElements());
-        model.addAttribute("users", users);
-        model.addAttribute("models", "users");
-        model.addAttribute("title", "Users Management");
-        return model;
+    @GetMapping("profile")
+    public Object profile() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth;
     }
 
     @GetMapping("user/create")

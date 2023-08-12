@@ -1,50 +1,34 @@
-package com.example.watchex.config;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.authentication.configuration.EnableGlobalAuthentication;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.SecurityFilterChain;
-
-@Configuration
-@EnableWebSecurity
-@EnableGlobalAuthentication
-public class WebSecurityConfig {
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/", "/home").permitAll()
-                        .requestMatchers("/bower_components/**", "/component/**", "/admin/**").permitAll() // link css thì không cần xác thực
-                        .requestMatchers(HttpMethod.POST, "/admin/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .formLogin((form) -> form
-                        .loginPage("/admin/login")
-                        .permitAll()
-                )
-                .logout((logout) -> logout.permitAll());
-
-        return http.build();
-    }
-
-    @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails user =
-                User.withDefaultPasswordEncoder()
-                        .username("user")
-                        .password("password")
-                        .roles("USER")
-                        .build();
-
-        return new InMemoryUserDetailsManager(user);
-    }
-
-}
+//package com.example.watchex.config;
+//
+//import lombok.AllArgsConstructor;
+//import org.springframework.context.annotation.Configuration;
+//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+//import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+//import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+//import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
+//
+//@Configuration
+//@AllArgsConstructor
+    //@EnableWebSecurity
+    //public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+//
+//    @Override
+//    protected void configure(HttpSecurity http) throws Exception {
+//        http
+//                .csrf().disable()
+//                .authorizeRequests()
+//                .antMatchers("/admin/auth/**", "/bower_components/**", "/component/**")
+//                .permitAll()
+//                .anyRequest()
+//                .authenticated().and()
+//                .formLogin((form) -> form
+//                        .loginPage("/admin/auth/login")
+//                        .defaultSuccessUrl("/admin/users", true)
+//                        .permitAll()
+//                )
+//                .logout(LogoutConfigurer::permitAll);
+//
+//    }
+//
+//
+//}

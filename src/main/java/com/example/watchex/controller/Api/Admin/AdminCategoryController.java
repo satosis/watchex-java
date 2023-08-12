@@ -1,11 +1,14 @@
-package com.example.watchex.controller.Admin;
+package com.example.watchex.controller.Api.Admin;
 
 import com.example.watchex.entity.Category;
+import com.example.watchex.exceptions.MessageEntity;
 import com.example.watchex.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +17,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/admin/")
-public class CategoryController {
+@RequestMapping("/api/admin/")
+public class AdminCategoryController {
     @Autowired
     private MessageSource messageSource;
 
@@ -23,24 +26,13 @@ public class CategoryController {
     private CategoryService categoryService;
 
     @GetMapping("categories")
-    public String get(Model model, @RequestParam Map<String, String> params) {
+    public ResponseEntity<?> getListAdv(@RequestParam Map<String, String> params) {
         int page = 0;
         if (params.get("page") != null) {
             page = Integer.parseInt(params.get("page"));
         }
-        findPaginate(page, model);
-        return "admin/categories/index";
-    }
-
-    private Model findPaginate(int page, Model model) {
         Page<Category> categories = categoryService.get(page);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", categories.getTotalPages());
-        model.addAttribute("totalItems", categories.getTotalElements());
-        model.addAttribute("categories", categories);
-        model.addAttribute("models", "categories");
-        model.addAttribute("title", "Categories Management");
-        return model;
+        return new ResponseEntity<>(new MessageEntity(200, categories), HttpStatus.OK);
     }
 
     @GetMapping("category/create")

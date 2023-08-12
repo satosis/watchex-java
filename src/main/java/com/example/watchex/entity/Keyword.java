@@ -1,14 +1,17 @@
-package com.example.watchex.domain;
+package com.example.watchex.entity;
 
-import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import javax.persistence.*;
 import java.util.Date;
-import java.util.Set;
 
 @Entity
 @Table(name = "keywords")
+@Getter
+@Setter
 public class Keyword {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,20 +29,5 @@ public class Keyword {
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
 }

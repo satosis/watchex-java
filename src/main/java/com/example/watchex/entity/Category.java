@@ -1,12 +1,17 @@
-package com.example.watchex.domain;
+package com.example.watchex.entity;
 
-import jakarta.persistence.*;
+import com.example.watchex.utils.CommonUtils;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "categories")
 public class Category {
     @Id
@@ -28,35 +33,9 @@ public class Category {
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSlug() {
-        return slug;
-    }
 
     public void setSlug(String slug) {
-        this.slug = slug;
+        this.slug = CommonUtils.toSlug(this.name);
     }
 
-    public Integer getType() {
-        return type;
-    }
-
-    public void setType(Integer type) {
-        this.type = type;
-    }
 }
