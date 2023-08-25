@@ -9,6 +9,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.sql.Blob;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
 
@@ -23,6 +25,9 @@ public class User implements UserDetails {
 
     @Column(length = 45, nullable = false)
     private String username;
+
+    @Lob
+    private Blob image;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -46,6 +51,11 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    public byte[] getImage() throws SQLException {
+        byte [] imageBytes = null;
+        imageBytes = image.getBytes(1,(int) image.length());
+        return imageBytes;
+    }
     public void setPassword(String password) {
         this.password = CommonUtils.encode(password);
     }

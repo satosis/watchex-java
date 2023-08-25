@@ -20,14 +20,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.sql.Blob;
+import java.sql.SQLException;
 
 @RestController
 @RequiredArgsConstructor
@@ -108,7 +108,7 @@ public class AuthController {
     }
 
     @PostMapping("auth/registered")
-    public ResponseEntity<?> register(@Valid RegisterDto registerDto) throws MethodArgumentNotValidException, MessagingException, IOException {
+    public ResponseEntity<?> register(@Valid RegisterDto registerDto, @RequestParam("image") MultipartFile file) throws MethodArgumentNotValidException, MessagingException, IOException, SQLException {
         boolean checkSamePassword = registerDto.getPassword_confirm().equals(registerDto.getPassword());
         if (!checkSamePassword) {
             return ResponseEntity.ok().body(new MessageEntity(400, "Mật khẩu xác nhận không chính xác !"));
@@ -116,8 +116,11 @@ public class AuthController {
         if (userService.existsByEmail(registerDto.getEmail())) {
             return ResponseEntity.ok().body(new MessageEntity(400, "Email đã được đăng ký !"));
         }
+        byte[] bytes = file.getBytes();
+        Blob blob = new javax.sql.rowset.serial.SerialBlob(bytes);
         User user = new User();
         user.setUsername(registerDto.getName());
+        user.setImage(blob);
         user.setEmail(registerDto.getEmail());
         user.setPhone(registerDto.getPhone());
         user.setPassword(registerDto.getPassword());
@@ -130,9 +133,9 @@ public class AuthController {
         token.setUser(user);
         tokenService.createToken(token);
         JwtResponse jwt = new JwtResponse(token.getToken(), user.getEmail());
-        String subject = "Đăng ký thành công ";
+        String subject = "Đăng ký thành công";
         String template = "user-register-template";
-        emailService.sendEmail(registerDto.getEmail(), subject, template);
+//        emailService.sendEmail(registerDto.getEmail(), subject, template);
         return ResponseEntity.ok().body(new MessageEntity(200, jwt));
 
     }

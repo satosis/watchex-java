@@ -3,20 +3,21 @@ package com.example.watchex.controller.Api.Admin;
 import com.example.watchex.entity.User;
 import com.example.watchex.exceptions.MessageEntity;
 import com.example.watchex.service.UserService;
+import com.example.watchex.utils.CommonUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import java.io.IOException;
 import java.nio.file.attribute.UserPrincipalNotFoundException;
+import java.sql.SQLException;
 import java.util.Map;
 
 @RestController
@@ -40,9 +41,16 @@ public class AdminUserController {
     }
 
     @GetMapping("profile")
-    public Object profile() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return auth;
+    public ResponseEntity<?> profile() {
+        User auth = CommonUtils.getCurrentUser();
+        return ResponseEntity.ok().body(auth);
+    }
+
+    @GetMapping("profile/image")
+    public ResponseEntity<byte[]> displayImage() throws SQLException
+    {
+        User auth = CommonUtils.getCurrentUser();
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(auth.getImage());
     }
 
     @GetMapping("user/create")
