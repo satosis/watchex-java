@@ -8,22 +8,26 @@ import com.example.watchex.dto.RegisterDto;
 import com.example.watchex.entity.Token;
 import com.example.watchex.entity.User;
 import com.example.watchex.exceptions.MessageEntity;
+import com.example.watchex.service.EmailSenderService;
 import com.example.watchex.service.JwtService;
 import com.example.watchex.service.TokenService;
 import com.example.watchex.service.UserService;
 import com.example.watchex.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.propertyeditors.StringTrimmerEditor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import javax.mail.MessagingException;
 import javax.validation.Valid;
+import java.io.IOException;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,6 +42,11 @@ public class AuthController {
     private final JwtUtils jwtUtil;
 
     private final JwtService jwtService;
+
+    @Autowired
+    private EmailSenderService emailService;
+
+
     @GetMapping("auth/login")
     public String loginForm(Model model, LoginDto loginDt0) {
         model.addAttribute("loginDto", loginDt0);
@@ -99,7 +108,7 @@ public class AuthController {
     }
 
     @PostMapping("auth/registered")
-    public ResponseEntity<?> register(@Valid RegisterDto registerDto) throws MethodArgumentNotValidException {
+    public ResponseEntity<?> register(@Valid RegisterDto registerDto) throws MethodArgumentNotValidException, MessagingException, IOException {
         boolean checkSamePassword = registerDto.getPassword_confirm().equals(registerDto.getPassword());
         if (!checkSamePassword) {
             return ResponseEntity.ok().body(new MessageEntity(400, "Mật khẩu xác nhận không chính xác !"));
@@ -121,6 +130,9 @@ public class AuthController {
         token.setUser(user);
         tokenService.createToken(token);
         JwtResponse jwt = new JwtResponse(token.getToken(), user.getEmail());
+        String subject = "Đăng ký thành công ";
+        String template = "user-register-template";
+        emailService.sendEmail(registerDto.getEmail(), subject, template);
         return ResponseEntity.ok().body(new MessageEntity(200, jwt));
 
     }
