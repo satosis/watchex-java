@@ -27,7 +27,7 @@ public class User implements UserDetails {
     private String username;
 
     @Lob
-    private Blob image;
+    private Blob avatar;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -38,7 +38,6 @@ public class User implements UserDetails {
     private String phone;
 
     private String address;
-    private String avatar;
 
     @Column(name = "is_admin", columnDefinition = "tinyint(1) default false")
     Boolean isAdmin = false ;
@@ -51,9 +50,9 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    public byte[] getImage() throws SQLException {
+    public byte[] getAvatar() throws SQLException {
         byte [] imageBytes = null;
-        imageBytes = image.getBytes(1,(int) image.length());
+        imageBytes = avatar.getBytes(1,(int) avatar.length());
         return imageBytes;
     }
     public void setPassword(String password) {

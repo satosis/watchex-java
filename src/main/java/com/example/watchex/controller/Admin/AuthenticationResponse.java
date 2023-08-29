@@ -1,5 +1,6 @@
 package com.example.watchex.controller.Admin;
 
+import com.example.watchex.entity.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,4 +17,6 @@ public class AuthenticationResponse {
     private String accessToken;
     @JsonProperty("refresh_token")
     private String refreshToken;
+    @JsonProperty("user")
+    private User user;
 }

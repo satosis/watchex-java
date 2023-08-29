@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.attribute.UserPrincipalNotFoundException;
@@ -30,7 +31,7 @@ public class UserServiceImpl extends GenericServiceImpl<User, Integer> implement
         if (result.isPresent()) {
             return result.get();
         }
-        throw new UserPrincipalNotFoundException("User not found");
+        throw new UserPrincipalNotFoundException("Tài khoản không tồn tại");
     }
 
     @Override
@@ -40,6 +41,10 @@ public class UserServiceImpl extends GenericServiceImpl<User, Integer> implement
 
     @Override
     public User findByEmail(String email) {
-        return repository.findByEmail(email);
+        Optional<User> result = Optional.ofNullable(repository.findByEmail(email));
+        if (result.isPresent()) {
+            return result.get();
+        }
+        throw new UsernameNotFoundException("Tài khoản không tồn tại");
     }
 }

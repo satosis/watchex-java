@@ -33,14 +33,14 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<MessageEntity> processSecurityError(Exception ex) {
         ex.printStackTrace();
         MessageEntity msg = new MessageEntity(null, "Bạn không có quyền thực hiện chức năng này!", MessageType.ERROR);
-        return new ResponseEntity<>(msg, HttpStatus.FORBIDDEN);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(msg);
     }
 
     @ExceptionHandler({ValidException.class})
     protected ResponseEntity<MessageEntity> handleValid(final RuntimeException ex) {
         ex.printStackTrace();
         MessageEntity msg = new MessageEntity(null, 400, ex.getMessage(), MessageType.ERROR);
-        return ResponseEntity.ok().body(msg);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
     }
 
     @ExceptionHandler({BindException.class})
@@ -48,35 +48,35 @@ public class GlobalExceptionHandler {
         String errorMessage = "Tham số không hợp lệ!";
         if (e.getBindingResult().hasErrors())
             errorMessage = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
-        return ResponseEntity.ok().body(new MessageEntity(400, errorMessage));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageEntity(400, errorMessage));
     }
 
     @ExceptionHandler({EntityNotFoundException.class})
     protected ResponseEntity<MessageEntity> handleNotFound(final RuntimeException ex) {
         ex.printStackTrace();
         MessageEntity msg = new MessageEntity((String) null, ex.getMessage(), MessageType.ERROR);
-        return new ResponseEntity<>(msg, HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
     }
 
     @ExceptionHandler({InvalidDataAccessApiUsageException.class, DataAccessException.class})
     protected ResponseEntity<MessageEntity> handleConflict(final RuntimeException ex, Locale locale) {
         ex.printStackTrace();
         MessageEntity msg = new MessageEntity(null, 500, "409 Conflict", MessageType.ERROR);
-        return new ResponseEntity<>(msg, HttpStatus.CONFLICT);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(msg);
     }
 
     @ExceptionHandler({HttpRequestMethodNotSupportedException.class, MethodArgumentTypeMismatchException.class})
     protected ResponseEntity<MessageEntity> handleHttpRequestNotSupported(RuntimeException ex) {
         ex.printStackTrace();
         MessageEntity msg = new MessageEntity(null, 400, ex.getMessage(), MessageType.ERROR);
-        return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
     }
 
     @ExceptionHandler({NullPointerException.class, IllegalArgumentException.class, IllegalStateException.class})
     public ResponseEntity<MessageEntity> handleInternal(final RuntimeException ex, Locale locale) {
         ex.printStackTrace();
         MessageEntity msg = new MessageEntity(null, 500, ex.getMessage(), MessageType.ERROR);
-        return new ResponseEntity<>(msg, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(msg);
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
@@ -87,7 +87,7 @@ public class GlobalExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-        return new ResponseEntity(errors, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors);
     }
 
     private MessageEntity processFieldError(FieldError error, Locale locale) {
@@ -104,8 +104,7 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<MessageEntity> handleAllException(Exception ex) {
         ex.printStackTrace();
         // todos: log database
-        MessageEntity msg = new MessageEntity(null, "Đã có lỗi xảy ra, lỗi đã được thông báo đến admin, mã lỗi []!", MessageType.ERROR);
-        return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
+        MessageEntity msg = new MessageEntity(null, ex.getMessage(), MessageType.ERROR);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(msg);
     }
-
 }

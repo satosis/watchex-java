@@ -15,19 +15,16 @@ import com.example.watchex.service.UserService;
 import com.example.watchex.utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.mail.MessagingException;
 import javax.validation.Valid;
-import java.io.IOException;
 import java.sql.Blob;
-import java.sql.SQLException;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,7 +43,6 @@ public class AuthController {
     @Autowired
     private EmailSenderService emailService;
 
-
     @GetMapping("auth/login")
     public String loginForm(Model model, LoginDto loginDt0) {
         model.addAttribute("loginDto", loginDt0);
@@ -54,27 +50,25 @@ public class AuthController {
     }
 
     @PostMapping("auth/checklogin")
-    public ResponseEntity<?> login(@Valid LoginDto loginDto) throws MethodArgumentNotValidException {
+    public ResponseEntity<?> login(@Valid LoginDto loginDto) throws MethodArgumentNotValidException, UsernameNotFoundException {
         AuthenticationResponse jwt;
-        try {
-            User user = userService.findByEmail(loginDto.getEmail());
+        User user = userService.findByEmail(loginDto.getEmail());
 
-            boolean checkPassword = new BCryptPasswordEncoder().matches(loginDto.getPassword(), user.getPassword());
-            if (!checkPassword || !user.getIsAdmin()) {
-                return ResponseEntity.ok().body(new MessageEntity(400, "Tài khoản hoặc mật khẩu không chính xác !"));
-            }
-            String jwtToken = jwtService.generateToken(user);
-            String refreshToken = jwtService.generateRefreshToken(user);
-            revokeAllUserTokens(user);
-            saveUserToken(user, jwtToken);
-
-            jwt = AuthenticationResponse.builder()
-                    .accessToken(jwtToken)
-                    .refreshToken(refreshToken)
-                    .build();
-        } catch (Exception e) {
-            return ResponseEntity.ok().body(new MessageEntity(400, e.getMessage()));
+        boolean checkPassword = new BCryptPasswordEncoder().matches(loginDto.getPassword(), user.getPassword());
+        if (!checkPassword || !user.getIsAdmin()) {
+            throw new UsernameNotFoundException("Tài khoản hoặc mật khẩu không chính xác !");
         }
+        String jwtToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+        revokeAllUserTokens(user);
+        saveUserToken(user, jwtToken);
+
+        jwt = AuthenticationResponse.builder()
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken)
+                .user(user)
+                .build();
+
 
         return ResponseEntity.ok(new MessageEntity(200, jwt));
     }
@@ -108,19 +102,19 @@ public class AuthController {
     }
 
     @PostMapping("auth/registered")
-    public ResponseEntity<?> register(@Valid RegisterDto registerDto, @RequestParam("image") MultipartFile file) throws MethodArgumentNotValidException, MessagingException, IOException, SQLException {
+    public ResponseEntity<?> register(@Valid RegisterDto registerDto, @RequestParam("image") MultipartFile file) throws Exception {
         boolean checkSamePassword = registerDto.getPassword_confirm().equals(registerDto.getPassword());
         if (!checkSamePassword) {
             return ResponseEntity.ok().body(new MessageEntity(400, "Mật khẩu xác nhận không chính xác !"));
         }
         if (userService.existsByEmail(registerDto.getEmail())) {
-            return ResponseEntity.ok().body(new MessageEntity(400, "Email đã được đăng ký !"));
+            throw new Exception("Email đã được đăng ký !");
         }
         byte[] bytes = file.getBytes();
         Blob blob = new javax.sql.rowset.serial.SerialBlob(bytes);
         User user = new User();
         user.setUsername(registerDto.getName());
-        user.setImage(blob);
+        user.setAvatar(blob);
         user.setEmail(registerDto.getEmail());
         user.setPhone(registerDto.getPhone());
         user.setPassword(registerDto.getPassword());

@@ -34,8 +34,11 @@ public class MessageEntity implements Serializable {
     public MessageEntity(int code,Object data) {
         this.code = code;
         this.data = data;
-        if(code == 200)
+        if(code == 200) {
             this.type = MessageType.SUCCESS;
+        } else {
+            this.type = MessageType.ERROR;
+        }
     }
 
     public MessageEntity(String field, String message, MessageType type) {

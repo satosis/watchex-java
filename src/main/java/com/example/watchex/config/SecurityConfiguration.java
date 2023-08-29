@@ -22,11 +22,10 @@ public class SecurityConfiguration {
     //    private final LogoutHandler logoutHandler;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf()
-                .disable()
+        http.cors()
+                .and()
                 .authorizeRequests()
-                    .antMatchers("/api/admin/auth/**", "/bower_components/**", "/component/**")
+                .antMatchers("/api/admin/auth/**", "/bower_components/**", "/component/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
@@ -35,7 +34,8 @@ public class SecurityConfiguration {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .csrf().disable();
 
         return http.build();
     }

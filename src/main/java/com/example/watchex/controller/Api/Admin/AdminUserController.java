@@ -50,7 +50,7 @@ public class AdminUserController {
     public ResponseEntity<byte[]> displayImage() throws SQLException
     {
         User auth = CommonUtils.getCurrentUser();
-        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(auth.getImage());
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(auth.getAvatar());
     }
 
     @GetMapping("user/create")
